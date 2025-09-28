@@ -231,7 +231,7 @@ class Device(BaseDevice, abc.ABC):
         self._advertisement_seen.set()
 
     def _get_topic(self, topic):
-        return '/'.join(filter(None, (self.unique_id, topic)))
+        return '/'.join(filter(None, (self.friendly_id, topic)))
 
     def _get_topic_for_entity(self, entity, *, skip_unique_id=False):
         subtopic = entity.get('topic', self.STATE_TOPIC)
@@ -307,7 +307,7 @@ class Device(BaseDevice, abc.ABC):
     @property
     def friendly_id(self):
         # should be used in entity names in homeassistant
-        return self.friendly_name or self.dev_id
+        return self.friendly_name or self.unique_id
 
     @property
     def unique_id(self):
@@ -488,11 +488,14 @@ class Device(BaseDevice, abc.ABC):
                     if self.LINKQUALITY_TOPIC else {}
                 ),
             },
-            {
+        )
+        sensor_entities.append(
+                        {
                 'name': 'last_seen',
                 'unit_of_measurement': None,
             },
         )
+
         return {
             **self.entities,
             SENSOR_DOMAIN: sensor_entities,
