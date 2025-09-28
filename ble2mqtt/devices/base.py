@@ -519,17 +519,18 @@ class Device(BaseDevice, abc.ABC):
                     continue
 
                 value = values_by_name[name]
-                content_values = (
-                    value if isinstance(value, dict) else {name: value}
-                )
+                # content_values = (
+                #     value if isinstance(value, dict) else {name: value}
+                # )
 
-                for parameter, val in content_values.items():
-                    if domain in [SENSOR_DOMAIN, BINARY_SENSOR_DOMAIN]:
-                        val = self.transform_value(val)
-                    topic = self._get_topic_for_entity(entity)
-                    data_by_topic[topic][parameter] = val
+                # for parameter, val in content_values.items():
+                if domain in [SENSOR_DOMAIN, BINARY_SENSOR_DOMAIN]:
+                    value = self.transform_value(value)
+                topic = self._get_topic_for_entity(entity)
+                data_by_topic[topic][name] = value
+
         coros = [
-            publish_topic(topic=topic, value=json.dumps(values))
+            publish_topic(topic=topic, value=str(next(iter(values.values()))))
             for topic, values in data_by_topic.items()
         ]
         if coros:
