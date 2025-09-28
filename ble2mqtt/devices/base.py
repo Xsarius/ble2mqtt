@@ -8,6 +8,8 @@ from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass
 from enum import Enum
 
+from datetime import datetime
+
 from bleak import BleakClient, BleakError
 from bleak.backends.device import BLEDevice
 
@@ -472,16 +474,41 @@ class Device(BaseDevice, abc.ABC):
             SENSOR_DOMAIN: sensor_entities,
         }
 
+    @property
+    def entities_with_lqi_and_timestamp(self):
+        sensor_entities = self.entities.get(SENSOR_DOMAIN, [])
+        sensor_entities.append(
+            {
+                'name': 'linkquality',
+                'unit_of_measurement': 'lqi',
+                'icon': 'signal',
+                'entity_category': 'diagnostic',
+                **(
+                    {'topic': self.LINKQUALITY_TOPIC}
+                    if self.LINKQUALITY_TOPIC else {}
+                ),
+            },
+            {
+                'name': 'last_seen',
+                'unit_of_measurement': None,
+            },
+        )
+        return {
+            **self.entities,
+            SENSOR_DOMAIN: sensor_entities,
+        }
+
     async def _notify_state(self, publish_topic):
         values_by_name = {
             'linkquality': self.linkquality,
+            'last_seen': datetime.now().isoformat(),
             **self.get_values_by_entities(),
         }
 
         _LOGGER.info(f'[{self}] send state={values_by_name}')
 
         data_by_topic = defaultdict(dict)
-        for domain, entities in self.entities_with_lqi.items():
+        for domain, entities in self.entities_with_lqi_and_timestamp.items():
             for entity in entities:
                 name = entity['name']
                 if name not in values_by_name:
