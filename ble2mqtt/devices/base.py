@@ -194,7 +194,7 @@ class Device(BaseDevice, abc.ABC):
     ACTIVE_SLEEP_INTERVAL = 60
     DEFAULT_PASSIVE_SLEEP_INTERVAL = 60
     # deprecated
-    LINKQUALITY_TOPIC: ty.Optional[str] = None
+    LINKQUALITY_TOPIC: ty.Optional[str] = 'linkquality'
     STATE_TOPIC: str = DEFAULT_STATE_TOPIC
 
     # secs to sleep if not connected or no data in passive mode
@@ -490,9 +490,10 @@ class Device(BaseDevice, abc.ABC):
             },
         )
         sensor_entities.append(
-                        {
+            {
                 'name': 'last_seen',
                 'unit_of_measurement': None,
+                'topic': 'last_seen',
             },
         )
 
@@ -641,17 +642,20 @@ class HumidityTemperatureSensor(Sensor, abc.ABC):
                     'name': 'temperature',
                     'device_class': 'temperature',
                     'unit_of_measurement': '\u00b0C',
+                    'topic': 'temperature',
                 },
                 {
                     'name': 'humidity',
                     'device_class': 'humidity',
                     'unit_of_measurement': '%',
+                    'topic': 'humidity',
                 },
                 {
                     'name': 'battery',
                     'device_class': 'battery',
                     'unit_of_measurement': '%',
                     'entity_category': 'diagnostic',
+                    'topic': 'battery',
                 },
             ],
         }
